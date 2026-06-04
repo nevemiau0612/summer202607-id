@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZPD 偵查終端 - 警員報到</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root { --zpd-blue: #0a2463; --zpd-dark: #020612; --zpd-gold: #fbaf00; --zpd-cyan: #00ebff; }
+        body { background-color: var(--zpd-dark); color: var(--zpd-cyan); font-family: 'Courier New', monospace; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        h1 { color: var(--zpd-gold); text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+        
+        #scanner-container { width: 100%; max-width: 500px; background: #000; padding: 20px; border: 2px solid var(--zpd-blue); border-radius: 4px; box-shadow: 0 0 15px rgba(0, 235, 255, 0.2); text-align: center; }
+        #reader { width: 100%; background: #000; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--zpd-blue); border: 3px solid var(--zpd-gold); padding: 30px; border-radius: 12px; width: 80%; max-width: 400px; color: white; text-align: center; }
+        .info-table { width: 100%; margin-top: 15px; border-collapse: collapse; }
+        .info-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.2); text-align: left; }
+        .info-table td:first-child { font-weight: bold; color: var(--zpd-gold); width: 40%; }
+        .btn-close { margin-top: 20px; padding: 12px 30px; background-color: var(--zpd-gold); color: black; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>🚨 ZPD 偵查終端</h1>
+    <div id="scanner-container">
+        <h3>啟動生物掃描</h3>
+        <div id="reader"></div>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div style="font-size: 24px; color: var(--zpd-cyan);">✅ 身份驗證成功</div>
+            <table class="info-table">
+                <tr><td>編號</td><td id="pop-id">-</td></tr>
+                <tr><td>姓名</td><td id="pop-name">-</td></tr>
+                <tr><td>單位</td><td id="pop-dept">-</td></tr>
+                <tr><td>職稱</td><td id="pop-title">-</td></tr>
+                <tr><td>時間</td><td id="pop-time">-</td></tr>
+            </table>
+            <button class="btn-close" onclick="closeModal()">確認並繼續</button>
+        </div>
+    </div>
+
+    <script>
+        let officerDatabase = {};
+        let isScanning = true;
+
+        // 載入資料庫
+        async function loadDatabase() {
+            try {
+                const response = await fetch('data.json');
+                officerDatabase = await response.json();
+            } catch (e) {
+                console.error("資料庫載入失敗，請確認 data.json 存在");
+            }
+        }
+
+        function onScanSuccess(decodedText) {
+            if (!isScanning) return;
+            isScanning = false;
+            
+            const id = decodedText.trim();
+            const officer = officerDatabase[id];
+
+            if (officer) {
+                document.getElementById('pop-id').innerText = id;
+                document.getElementById('pop-name').innerText = officer.name;
+                document.getElementById('pop-dept').innerText = officer.dept;
+                document.getElementById('pop-title').innerText = officer.title;
+                document.getElementById('pop-time').innerText = new Date().toLocaleTimeString();
+                document.getElementById('resultModal').style.display = 'flex';
+            } else {
+                alert("⚠️ 未授權編號: " + id);
+                isScanning = true;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').style.display = 'none';
+            setTimeout(() => { isScanning = true; }, 1000);
+        }
+
+        // 初始化
+        window.addEventListener('load', async () => {
+            await loadDatabase();
+            new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }).render(onScanSuccess, () => {});
+        });
+    </script>
+</body>
+</html>
