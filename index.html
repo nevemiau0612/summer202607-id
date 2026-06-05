@@ -6,14 +6,10 @@
     <title>警員報到系統</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        :root { --bg-color: #f4f4f9; --card-bg: #ffffff; }
-        body { 
-            text-align: center; padding: 20px; font-family: sans-serif; 
-            background-color: var(--bg-color) !important; color: #000 !important; 
-        }
+        body { text-align: center; padding: 20px; font-family: sans-serif; background-color: #f4f4f9; }
         #reader { width: 100%; max-width: 400px; margin: auto; border: 2px solid #ccc; background: white; }
         .result { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; }
-        .card { background: var(--card-bg) !important; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -29,7 +25,6 @@
     </div>
 
     <script>
-        // 資料庫：修改這裡來新增警員
         const db = {
             "P10501": { name: "陳正義", dept: "自由方程式警局", title: "新手警員" },
             "P10502": { name: "林志強", dept: "自由方程式警局", title: "新手警員" }
@@ -46,20 +41,22 @@
                 div.style.backgroundColor = "#d4edda";
             } else {
                 document.getElementById('msg').innerText = "❌ 無此編號：" + id;
-                document.getElementById('info').innerText = "查無此人，請確認編號";
+                document.getElementById('info').innerText = "查無此人";
                 div.style.backgroundColor = "#f8d7da";
             }
             div.style.display = "block";
             setTimeout(() => { div.style.display = "none"; }, 5000);
         }
 
-        // 高靈敏度掃描器設定
-        const scanner = new Html5QrcodeScanner("reader", { 
-            fps: 20, 
-            qrbox: { width: 250, height: 250 },
-            rememberLastUsedCamera: true
+        // 初始化掃描器
+        const html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "user" }, // 強制前置鏡頭
+            { fps: 10, qrbox: 250 },
+            onScanSuccess
+        ).catch(err => {
+            alert("無法啟動相機，請確認已允許權限。");
         });
-        scanner.render(onScanSuccess);
     </script>
 </body>
 </html>
