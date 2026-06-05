@@ -5,10 +5,35 @@
     <title>警員報到系統</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { text-align: center; padding: 20px; font-family: sans-serif; background-color: #f4f4f9; }
-        #reader { width: 100%; max-width: 400px; margin: auto; border: 2px solid #ccc; }
-        .result { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    /* 強制鎖定配色，防止裝置自動反轉 */
+    :root {
+        --bg-color: #f4f4f9;
+        --card-bg: #ffffff;
+    }
+
+    body { 
+        text-align: center; 
+        padding: 20px; 
+        font-family: sans-serif; 
+        background-color: var(--bg-color) !important; /* 強制背景色 */
+        color: #000 !important; /* 強制文字為黑色 */
+    }
+
+    #reader { width: 100%; max-width: 400px; margin: auto; border: 2px solid #ccc; }
+    
+    .result { 
+        margin-top: 20px; 
+        padding: 20px; 
+        border-radius: 10px; 
+        display: none; 
+    }
+
+    .card { 
+        background: var(--card-bg) !important; /* 強制卡片白色 */
+        padding: 15px; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+    }
     </style>
 </head>
 <body>
