@@ -5,50 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>自由方城市警員報到系統</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-    /* 強制定義樣式，避免 iPad 自動反轉顏色 */
-    html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        background-color: #f4f4f9 !important; /* 強制背景淺灰色 */
-    }
-
+   <style>
+    /* 深色科技風格：寶石終端機 */
     body { 
         text-align: center; 
         padding: 20px; 
-        font-family: sans-serif; 
-        color: #000000 !important; /* 強制文字為黑色 */
+        font-family: 'Courier New', Courier, monospace; /* 終端機字體 */
+        background-color: #0a0e14 !important; /* 深黑底色 */
+        color: #00ffcc !important; /* 霓虹青綠色文字 */
+        margin: 0;
     }
 
     #reader { 
         width: 100%; 
         max-width: 400px; 
         margin: auto; 
-        border: 2px solid #ccc; 
-        background-color: #ffffff !important; /* 強制掃描框背景為白色 */
+        border: 2px solid #00ffcc; 
+        background: #000; 
+        box-shadow: 0 0 15px #00ffcc; /* 發光效果 */
     }
 
     .result { 
         margin-top: 20px; 
         padding: 20px; 
-        border-radius: 10px; 
+        border-radius: 5px; 
         display: none; 
+        border: 1px solid #00ffcc;
+        background-color: #1a1a1a;
     }
 
     .card { 
-        background-color: #ffffff !important; /* 強制結果卡片背景為白色 */
+        background: #1a1a1a !important; 
         padding: 15px; 
-        border-radius: 8px; 
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-        color: #000000 !important;
+        border-radius: 5px; 
+        box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); 
+        color: #fff;
     }
 
-    /* 防止 iOS 自動改變顏色 */
-    @media (prefers-color-scheme: dark) {
-        body { background-color: #f4f4f9 !important; }
-        .card { background-color: #ffffff !important; color: #000000 !important; }
-    }
+    h1 { text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #00ffcc; }
 </style>
 </head>
 <body>
