@@ -1,33 +1,8 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>警員報到系統</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        body { text-align: center; padding: 20px; font-family: sans-serif; background-color: #f4f4f9; }
-        #reader { width: 100%; max-width: 400px; margin: auto; border: 2px solid #ccc; background: white; }
-        .result { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    </style>
-</head>
-<body>
-
-    <h1>🚨 報到終端</h1>
-    <div id="reader"></div>
-
-    <div id="result" class="result">
-        <div class="card">
-            <h2 id="msg"></h2>
-            <p id="info"></p>
-        </div>
-    </div>
-
-    <script>
+<script>
+        // 資料庫：新增了 'group' 欄位
         const db = {
-            "P10501": { name: "陳正義", dept: "自由方程式警局", title: "新手警員" },
-            "P10502": { name: "林志強", dept: "自由方程式警局", title: "新手警員" }
+            "P10501": { name: "陳正義", dept: "自由方程式警局", title: "新手警員", group: "第一巡邏組" },
+            "P10502": { name: "林志強", dept: "自由方程式警局", title: "新手警員", group: "第二巡邏組" }
         };
 
         function onScanSuccess(decodedText) {
@@ -37,11 +12,13 @@
             
             if (person) {
                 document.getElementById('msg').innerText = "✅ 報到成功：" + person.name;
-                document.getElementById('info').innerText = "單位：" + person.dept + " | 職稱：" + person.title;
+                // 在這裡加入了組別顯示
+                document.getElementById('info').innerText = 
+                    `單位：${person.dept} | 職稱：${person.title} | 組別：${person.group}`;
                 div.style.backgroundColor = "#d4edda";
             } else {
                 document.getElementById('msg').innerText = "❌ 無此編號：" + id;
-                document.getElementById('info').innerText = "查無此人";
+                document.getElementById('info').innerText = "查無此人，請確認編號";
                 div.style.backgroundColor = "#f8d7da";
             }
             div.style.display = "block";
@@ -51,12 +28,10 @@
         // 初始化掃描器
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start(
-            { facingMode: "user" }, // 強制前置鏡頭
+            { facingMode: "user" }, 
             { fps: 10, qrbox: 250 },
             onScanSuccess
         ).catch(err => {
             alert("無法啟動相機，請確認已允許權限。");
         });
     </script>
-</body>
-</html>
