@@ -73,7 +73,20 @@
             setTimeout(() => { div.style.display = "none"; }, 5000);
         }
 
-        new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }).render(onScanSuccess);
+// 啟動高敏銳度掃描器
+const html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+    fps: 20, // 提升掃描頻率，從 10 提升到 20
+    qrbox: { width: 250, height: 250 }, // 鎖定掃描區域，聚焦於框內
+    aspectRatio: 1.0,
+    // 加入相機優化設定
+    videoConstraints: {
+        facingMode: "environment", // 強制使用後鏡頭
+        width: { ideal: 1280 },   // 強制使用高解析度
+        height: { ideal: 720 }
+    }
+});
+
+html5QrcodeScanner.render(onScanSuccess);
     </script>
 </body>
 </html>
