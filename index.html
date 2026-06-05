@@ -1,68 +1,31 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>警員報到系統</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        body { text-align: center; padding: 20px; font-family: sans-serif; background-color: #f4f4f9; }
-        #reader { width: 100%; max-width: 400px; margin: auto; border: 2px solid #ccc; background: white; }
-        .result { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    </style>
-</head>
-<body>
+<script>
+    // 資料庫：把單位與職稱也寫進去，確保一定顯示
+    const db = {
+        "P001": { name: "黃軒樂", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
+        "P002": { name: "江譽馨", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
+        // ... (以此類推)
+        "P031": { name: "秦恩冕", group: "第六組", dept: "自由方程式警局", title: "新手警員" }
+    };
 
-    <h1>🚨 報到終端</h1>
-    <div id="reader"></div>
-
-    <div id="result" class="result">
-        <div class="card">
-            <h2 id="msg"></h2>
-            <p id="info"></p>
-        </div>
-    </div>
-
-    <script>
-        // 資料庫：包含單位、職稱、組別
-        const db = {
-            "P001": { name: "黃軒樂", group: "第一組" }, "P002": { name: "江譽馨", group: "第一組" }, "P003": { name: "林書亞", group: "第一組" }, "P004": { name: "蔡牧寧", group: "第一組" }, "P005": { name: "蔡喬羽", group: "第一組" },
-            "P006": { name: "江欣妮", group: "第二組" }, "P007": { name: "洪孜甯", group: "第二組" }, "P008": { name: "謝礽", group: "第二組" }, "P009": { name: "曾愷心", group: "第二組" }, "P010": { name: "周婷儀", group: "第二組" }, "P011": { name: "秦恩惠", group: "第二組" },
-            "P012": { name: "張晏寧", group: "第三組" }, "P013": { name: "姜允媃", group: "第三組" }, "P014": { name: "侯邵博", group: "第三組" }, "P015": { name: "陳柏宇", group: "第三組" }, "P016": { name: "宋之穎", group: "第三組" },
-            "P017": { name: "謝祾", group: "第五組" }, "P018": { name: "高稚茵", group: "第五組" }, "P019": { name: "陳柏宣", group: "第五組" }, "P020": { name: "洪孜丞", group: "第五組" }, "P021": { name: "劉品均", group: "第五組" },
-            "P022": { name: "王品韻", group: "第四組" }, "P023": { name: "呂姵寧", group: "第四組" }, "P024": { name: "劉家齊", group: "第四組" }, "P025": { name: "賴牧敬", group: "第四組" }, "P026": { name: "紀恆", group: "第四組" },
-            "P027": { name: "林路亞", group: "第六組" }, "P028": { name: "郭純妤", group: "第六組" }, "P029": { name: "賴牧謙", group: "第六組" }, "P030": { name: "秦聖勇", group: "第六組" }, "P031": { name: "秦恩冕", group: "第六組" }
-        };
-
-        function onScanSuccess(decodedText) {
-            const id = decodedText.trim();
-            const person = db[id];
-            const div = document.getElementById('result');
-            
-            if (person) {
-                document.getElementById('msg').innerText = "✅ 報到成功：" + person.name;
-                // 這裡加入了單位與職稱資訊
-                document.getElementById('info').innerText = 
-                    `單位：自由方程式警局 | 職稱：新手警員 | ${person.group}`;
-                div.style.backgroundColor = "#d4edda";
-            } else {
-                document.getElementById('msg').innerText = "❌ 無此編號：" + id;
-                document.getElementById('info').innerText = "查無此人，請確認編號";
-                div.style.backgroundColor = "#f8d7da";
-            }
-            div.style.display = "block";
-            setTimeout(() => { div.style.display = "none"; }, 5000);
+    function onScanSuccess(decodedText) {
+        const id = decodedText.trim();
+        const person = db[id];
+        const div = document.getElementById('result');
+        
+        if (person) {
+            document.getElementById('msg').innerText = "✅ 報到成功：" + person.name;
+            // 這裡直接引用資料庫裡的欄位，就不會漏掉了
+            document.getElementById('info').innerText = 
+                `單位：${person.dept} | 職稱：${person.title} | 組別：${person.group}`;
+            div.style.backgroundColor = "#d4edda";
+        } else {
+            // 如果查不到資料，顯示「查無此編號」
+            document.getElementById('msg').innerText = "❌ 查無此編號：" + id;
+            document.getElementById('info').innerText = "請檢查 QR Code 編號是否正確";
+            div.style.backgroundColor = "#f8d7da";
         }
-
-        const html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-            { facingMode: "user" }, 
-            { fps: 10, qrbox: 250 },
-            onScanSuccess
-        ).catch(err => {
-            alert("相機啟動失敗，請確保已允許權限。");
-        });
-    </script>
-</body>
-</html>
+        div.style.display = "block";
+        setTimeout(() => { div.style.display = "none"; }, 5000);
+    }
+    // ... (後續啟動代碼不變)
+</script>
