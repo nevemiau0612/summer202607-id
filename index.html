@@ -1,39 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>警員報到系統</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-    /* 強制鎖定配色，防止裝置自動反轉 */
-    :root {
-        --bg-color: #f4f4f9;
-        --card-bg: #ffffff;
-    }
-
-    body { 
-        text-align: center; 
-        padding: 20px; 
-        font-family: sans-serif; 
-        background-color: var(--bg-color) !important; /* 強制背景色 */
-        color: #000 !important; /* 強制文字為黑色 */
-    }
-
-    #reader { width: 100%; max-width: 400px; margin: auto; border: 2px solid #ccc; }
-    
-    .result { 
-        margin-top: 20px; 
-        padding: 20px; 
-        border-radius: 10px; 
-        display: none; 
-    }
-
-    .card { 
-        background: var(--card-bg) !important; /* 強制卡片白色 */
-        padding: 15px; 
-        border-radius: 8px; 
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-    }
+        :root { --bg-color: #f4f4f9; --card-bg: #ffffff; }
+        body { 
+            text-align: center; padding: 20px; font-family: sans-serif; 
+            background-color: var(--bg-color) !important; color: #000 !important; 
+        }
+        #reader { width: 100%; max-width: 400px; margin: auto; border: 2px solid #ccc; background: white; }
+        .result { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; }
+        .card { background: var(--card-bg) !important; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -49,7 +29,7 @@
     </div>
 
     <script>
-        // 在這裡直接編輯名單 (單位與職稱可自由修改)
+        // 資料庫：修改這裡來新增警員
         const db = {
             "P10501": { name: "陳正義", dept: "自由方程式警局", title: "新手警員" },
             "P10502": { name: "林志強", dept: "自由方程式警局", title: "新手警員" }
@@ -66,27 +46,20 @@
                 div.style.backgroundColor = "#d4edda";
             } else {
                 document.getElementById('msg').innerText = "❌ 無此編號：" + id;
-                document.getElementById('info').innerText = "請聯繫管理員";
+                document.getElementById('info').innerText = "查無此人，請確認編號";
                 div.style.backgroundColor = "#f8d7da";
             }
             div.style.display = "block";
             setTimeout(() => { div.style.display = "none"; }, 5000);
         }
 
-// 啟動高敏銳度掃描器
-const html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-    fps: 20, // 提升掃描頻率，從 10 提升到 20
-    qrbox: { width: 250, height: 250 }, // 鎖定掃描區域，聚焦於框內
-    aspectRatio: 1.0,
-    // 加入相機優化設定
-    videoConstraints: {
-        facingMode: "environment", // 強制使用後鏡頭
-        width: { ideal: 1280 },   // 強制使用高解析度
-        height: { ideal: 720 }
-    }
-});
-
-html5QrcodeScanner.render(onScanSuccess);
+        // 高靈敏度掃描器設定
+        const scanner = new Html5QrcodeScanner("reader", { 
+            fps: 20, 
+            qrbox: { width: 250, height: 250 },
+            rememberLastUsedCamera: true
+        });
+        scanner.render(onScanSuccess);
     </script>
 </body>
 </html>
