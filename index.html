@@ -5,44 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>自由方城市警員報到系統</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
-   <style>
-    /* 深色科技風格：寶石終端機 */
-    body { 
-        text-align: center; 
-        padding: 20px; 
-        font-family: 'Courier New', Courier, monospace; /* 終端機字體 */
-        background-color: #0a0e14 !important; /* 深黑底色 */
-        color: #00ffcc !important; /* 霓虹青綠色文字 */
+<style>
+    /* 強制深色主題，鎖死顏色 */
+    :root {
+        --primary-color: #00e5ff; /* 寶石藍/青色光 */
+        --bg-color: #050b15;
+    }
+
+    body {
         margin: 0;
+        padding: 20px;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%) !important;
+        color: white !important;
+        min-height: 100vh;
     }
 
-    #reader { 
-        width: 100%; 
-        max-width: 400px; 
-        margin: auto; 
-        border: 2px solid #00ffcc; 
-        background: #000; 
-        box-shadow: 0 0 15px #00ffcc; /* 發光效果 */
+    h1 {
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        font-weight: 300;
+        text-shadow: 0 0 15px var(--primary-color);
+        margin-bottom: 30px;
     }
 
-    .result { 
-        margin-top: 20px; 
-        padding: 20px; 
-        border-radius: 5px; 
-        display: none; 
-        border: 1px solid #00ffcc;
-        background-color: #1a1a1a;
+    #reader {
+        width: 100%;
+        max-width: 450px;
+        margin: auto;
+        border: 1px solid rgba(0, 229, 255, 0.5);
+        background: rgba(0, 0, 0, 0.6) !important;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
     }
 
-    .card { 
-        background: #1a1a1a !important; 
-        padding: 15px; 
-        border-radius: 5px; 
-        box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); 
-        color: #fff;
+    .result {
+        margin-top: 25px;
+        padding: 25px;
+        background: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(10px); /* 毛玻璃特效 */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        display: none;
     }
 
-    h1 { text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #00ffcc; }
+    .card {
+        background: transparent !important;
+    }
+
+    #msg { color: var(--primary-color); }
+    #info { font-size: 1.1em; opacity: 0.8; }
 </style>
 </head>
 <body>
