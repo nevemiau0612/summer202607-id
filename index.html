@@ -1,137 +1,388 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自由方城市警員報到系統</title>
+    <title>🚨 警員寶石報到終端機</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
-<style>
-    /* 強制深色主題，鎖死顏色 */
-    :root {
-        --primary-color: #00e5ff; /* 寶石藍/青色光 */
-        --bg-color: #050b15;
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap');
 
-    body {
-        margin: 0;
-        padding: 20px;
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%) !important;
-        color: white !important;
-        min-height: 100vh;
-    }
+        :root {
+            --term-bg: #0d0d1a;
+            --term-metal: #22223b;
+            --gem-purple: #9d4edd;
+            --gem-glow: rgba(157, 78, 221, 0.6);
+            --text-glow-blue: #a0d8f1;
+            --text-gold: #f7e6c4;
+            --text-gold-light: #fff8eb;
+        }
 
-    h1 {
-        text-transform: uppercase;
-        letter-spacing: 5px;
-        font-weight: 300;
-        text-shadow: 0 0 15px var(--primary-color);
-        margin-bottom: 30px;
-    }
+        body {
+            font-family: 'Noto Sans TC', 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, var(--term-bg) 0%, #1a1a2e 100%);
+            color: var(--text-glow-blue);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            justify-content: space-around;
+        }
 
-    #reader {
-        width: 100%;
-        max-width: 450px;
-        margin: auto;
-        border: 1px solid rgba(0, 229, 255, 0.5);
-        background: rgba(0, 0, 0, 0.6) !important;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
-    }
+        /* 終端機主體框 */
+        #terminal-chassis {
+            width: 100%;
+            max-width: 700px;
+            background: var(--term-metal);
+            border: 2px solid #333;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), 0 0 10px rgba(100, 100, 200, 0.2) inset;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
 
-    .result {
-        margin-top: 25px;
-        padding: 25px;
-        background: rgba(255, 255, 255, 0.05) !important;
-        backdrop-filter: blur(10px); /* 毛玻璃特效 */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        display: none;
-    }
+        #terminal-chassis::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/circuit-board.png');
+            opacity: 0.1;
+            pointer-events: none;
+        }
 
-    .card {
-        background: transparent !important;
-    }
+        /* 標題 */
+        .term-title {
+            color: var(--text-gold);
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px var(--text-gold), 0 0 5px #000;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
+        }
 
-    #msg { color: var(--primary-color); }
-    #info { font-size: 1.1em; opacity: 0.8; }
-</style>
+        /* 掃描區域容器 */
+        #scanner-core {
+            width: 90%;
+            max-width: 450px;
+            background: #000;
+            border: 3px solid #555;
+            border-radius: 50%; /* 圓形核心 */
+            box-shadow: 0 0 20px rgba(0, 0, 100, 0.5), 0 0 15px rgba(100, 255, 255, 0.2) inset;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #scanner-core::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 70%, #000 100%);
+            pointer-events: none;
+        }
+
+        /* 掃描區域內核（已加入鏡像翻轉功能） */
+        #reader {
+            width: 100%;
+            border: 2px solid rgba(100, 255, 255, 0.3);
+            border-radius: 50%;
+            /* 同時放大 1.1 倍並水平翻轉（呈現左右鏡像效果） */
+            transform: scale(1.1) scaleX(-1); 
+        }
+
+        /* 提示文字 */
+        .scan-prompt {
+            color: var(--text-glow-blue);
+            font-size: 1.1rem;
+            text-shadow: 0 0 5px var(--text-glow-blue);
+            margin-top: 15px;
+            z-index: 10;
+        }
+
+        /* 彈出視窗樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        /* 寶石彈窗主體 - 模擬切面寶石外觀與發光 */
+        .gem-terminal {
+            background: radial-gradient(circle, #5e289c 0%, #1d1135 100%);
+            border: 3px solid silver;
+            border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%; /* 精確模擬橢圓切面寶石形狀 */
+            width: 90%;
+            max-width: 440px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 0 60px var(--gem-glow), 0 0 20px rgba(255, 255, 255, 0.2) inset;
+            text-align: center;
+            font-family: 'Noto Sans TC', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 480px;
+            box-sizing: border-box;
+        }
+
+        .gem-terminal::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/cut-crystal.png');
+            opacity: 0.15;
+            pointer-events: none;
+            border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+        }
+
+        /* 頭像框 */
+        .avatar-frame {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 3px solid var(--gem-purple);
+            background-color: rgba(30, 10, 50, 0.5);
+            margin: 0 auto 15px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 0 15px var(--gem-glow), 0 0 5px silver;
+            position: relative;
+        }
+
+        /* 成功狀態 */
+        .status-success-gem {
+            color: #4ade80; 
+            font-weight: bold;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #4ade80;
+            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
+        }
+
+        /* 資料表格 */
+        .info-table-gem {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+            font-size: 1.05rem;
+        }
+
+        .info-table-gem td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+            color: var(--text-gold);
+            text-shadow: 0 0 5px var(--text-gold);
+        }
+
+        .info-table-gem td:first-child {
+            font-weight: bold;
+            color: #ccc;
+            width: 35%;
+            letter-spacing: 1px;
+        }
+
+        /* 關鍵標識：溫柔 (GENTLENESS) */
+        .gentleness-brand {
+            margin-top: 25px;
+            margin-bottom: 5px;
+            color: var(--text-gold-light);
+            font-size: 1.3rem;
+            text-shadow: 0 0 8px var(--text-gold-light), 0 0 3px #000;
+            font-weight: bold;
+            font-family: 'Noto Sans TC', sans-serif;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .gentleness-brand-zh {
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        
+        .gentleness-brand-en {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* 確認按鈕 */
+        .btn-confirm-gem {
+            margin-top: 15px;
+            padding: 10px 25px;
+            background: linear-gradient(135deg, var(--gem-purple) 0%, #7b2cbf 100%);
+            color: var(--text-gold);
+            border: 2px solid silver;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
+            transition: all 0.2s;
+            text-shadow: 0 0 5px #000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5), 0 0 10px var(--gem-glow);
+            letter-spacing: 1px;
+        }
+
+        .btn-confirm-gem:hover { 
+            background: linear-gradient(135deg, #7b2cbf 0%, var(--gem-purple) 100%);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.8), 0 0 15px rgba(157, 78, 221, 0.8);
+            transform: translateY(2px);
+        }
+
+        /* 隱藏套件預設不必要按鈕 */
+        #html5-qrcode-anchor-scan-type-change { display: none !important; } 
+        #reader__dashboard_section_csr button {
+            background-color: #22223b !important;
+            color: #f7e6c4 !important;
+            border: 1px solid #555 !important;
+            border-radius: 5px !important;
+            padding: 6px 12px !important;
+            cursor: pointer !important;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>🚨 自由方城市警員報到系統🚨 </h1>
-    <div id="reader"></div>
+    <div id="terminal-chassis">
+        <div class="term-title">🚨 警員寶石報到終端機</div>
+        
+        <div id="scanner-core">
+            <div id="reader"></div>
+        </div>
+        <div class="scan-prompt">請將警員 QR Code 對準鏡頭</div>
+    </div>
 
-    <div id="result" class="result">
-        <div class="card">
-            <h2 id="msg"></h2>
-            <p id="info"></p>
+    <div id="resultModal" class="modal">
+        <div class="gem-terminal" id="gem-terminal">
+            <div style="width: 100%;">
+                <div class="status-success-gem">✅ 報到成功</div>
+                <div id="pop-avatar" class="avatar-frame"></div>
+                
+                <table class="info-table-gem">
+                    <tr><td>警員編號</td><td id="pop-id">-</td></tr>
+                    <tr><td>姓名</td><td id="pop-name">-</td></tr>
+                    <tr><td>單位</td><td id="pop-dept">-</td></tr>
+                    <tr><td>職稱</td><td id="pop-title">-</td></tr>
+                    <tr><td>報到時間</td><td id="pop-time">-</td></tr>
+                </table>
+            </div>
+            
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <div class="gentleness-brand">
+                    <span class="gentleness-brand-zh">溫柔</span>
+                    <span class="gentleness-brand-en">(GENTLENESS)</span>
+                </div>
+                
+                <button class="btn-confirm-gem" onclick="closeModal()">確認並繼續</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const db = {
-            "P001": { name: "黃軒樂", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-            "P002": { name: "江譽馨", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-            "P003": { name: "林書亞", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-            "P004": { name: "蔡牧寧", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-            "P005": { name: "蔡喬羽", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-            "P006": { name: "江欣妮", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P007": { name: "洪孜甯", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P008": { name: "謝礽", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P009": { name: "曾愷心", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P010": { name: "周婷儀", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P011": { name: "秦恩惠", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P012": { name: "張晏寧", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P013": { name: "姜允媃", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P014": { name: "侯邵博", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P015": { name: "陳柏宇", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P016": { name: "宋之穎", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P017": { name: "謝祾", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P018": { name: "高稚茵", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P019": { name: "陳柏宣", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P020": { name: "洪孜丞", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P021": { name: "劉品均", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P022": { name: "王品韻", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P023": { name: "呂姵寧", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P024": { name: "劉家齊", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P025": { name: "賴牧敬", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P026": { name: "紀恆", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P027": { name: "林路亞", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
-            "P028": { name: "郭純妤", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
-            "P029": { name: "賴牧謙", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
-            "P030": { name: "秦聖勇", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
-            "P031": { name: "秦恩冕", group: "第六組", dept: "自由方程式警局", title: "新手警員" }
+        // 【後台警員名單資料庫】
+        // 這裡的 key 值（如 "P10501"）必須與 QR Code 掃描出來的內容完全一致
+        const officerDatabase = {
+            "P10501": {
+                name: "陳正義",
+                dept: "刑事警察大隊 第一隊",
+                title: "偵查員",
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" // 測試用頭像
+            },
+            "P10502": {
+                name: "林志強",
+                dept: "交通警察大隊 直屬一中隊",
+                title: "警員",
+                avatar: "" // 留空則不顯示頭像
+            },
+            "P10503": {
+                name: "張明輝",
+                dept: "保安警察大隊",
+                title: "中隊長",
+                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
+            }
         };
 
-        function onScanSuccess(decodedText) {
-            const id = decodedText.trim();
-            const person = db[id];
-            const div = document.getElementById('result');
-            
-            if (person) {
-                document.getElementById('msg').innerText = "✅ 報到成功：" + person.name;
-                document.getElementById('info').innerText = 
-                    `單位：${person.dept} | 職稱：${person.title} | ${person.group}`;
-                div.style.backgroundColor = "#d4edda";
-            } else {
-                document.getElementById('msg').innerText = "❌ 無此編號：" + id;
-                document.getElementById('info').innerText = "查無此人，請確認編號是否正確";
-                div.style.backgroundColor = "#f8d7da";
-            }
-            div.style.display = "block";
-            setTimeout(() => { div.style.display = "none"; }, 5000);
+        let html5QrcodeScanner;
+        let isScanning = true;
+
+        // 初始化掃描器
+        function initScanner() {
+            // aspectRatio: 1.0 設定為正方形比例，能完美塞入我們的圓形發光核心中
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader", { fps: 10, qrbox: 250, aspectRatio: 1.0 }
+            );
+            html5QrcodeScanner.render(onScanSuccess, onScanError);
         }
 
-        const html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-            { facingMode: "user" }, 
-            { fps: 10, qrbox: 250 },
-            onScanSuccess
-        ).catch(err => {
-            alert("相機啟動失敗，請確認已允許權限。");
-        });
+        // 掃描成功事件
+        function onScanSuccess(decodedText, decodedResult) {
+            if (!isScanning) return;
+            isScanning = false; // 暫停掃描
+            
+            const officerId = decodedText.trim();
+            const officer = officerDatabase[officerId];
+
+            if (officer) {
+                // 寫入資料
+                document.getElementById('pop-id').innerText = officerId;
+                document.getElementById('pop-name').innerText = officer.name;
+                document.getElementById('pop-dept').innerText = officer.dept;
+                document.getElementById('pop-title').innerText = officer.title;
+                
+                // 取得當前時間
+                const now = new Date();
+                document.getElementById('pop-time').innerText = now.toLocaleTimeString();
+                
+                // 處理頭像
+                const avatarFrame = document.getElementById('pop-avatar');
+                if(officer.avatar) {
+                    avatarFrame.style.backgroundImage = `url('${officer.avatar}')`;
+                } else {
+                    avatarFrame.style.backgroundImage = 'none';
+                }
+
+                // 彈出寶石視窗
+                document.getElementById('resultModal').style.display = 'flex';
+            } else {
+                alert(`⚠️ 查無此警員編號: ${officerId}`);
+                isScanning = true; // 查無此人直接恢復掃描
+            }
+        }
+
+        function onScanError(err) {
+            // 忽略未對準時的連續報錯以確保運作順暢
+        }
+
+        // 關閉視窗
+        function closeModal() {
+            document.getElementById('resultModal').style.display = 'none';
+            // 延遲 1 秒後重啟掃描，避免手抖重複感應
+            setTimeout(() => {
+                isScanning = true;
+            }, 1000);
+        }
+
+        // 網頁載入完畢後自動執行
+        window.addEventListener('load', initScanner);
     </script>
 </body>
 </html>
