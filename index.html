@@ -79,6 +79,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            
+            /* 🔥 關鍵修正：直接在容器級別進行視覺上的鏡像翻轉 */
+            transform: scaleX(-1); 
+            -webkit-transform: scaleX(-1);
         }
 
         #scanner-core::after {
@@ -98,14 +102,13 @@
             overflow: hidden;
         }
 
-        /* 🔥 強制將套件產生的相機畫面進行鏡像翻轉（左右反轉） */
+        /* 讓套件內部的 video 和 canvas 保持原樣，不單獨破壞它 */
         #reader video {
-            transform: scaleX(-1) !important;
-            -webkit-transform: scaleX(-1) !important; /* 支援 Safari 瀏覽器 */
             border-radius: 50%;
+            object-fit: cover;
         }
 
-        /* 提示文字 */
+        /* 提示文字（因為外層被翻轉了，提示文字要在外面，才不會變成反字） */
         .scan-prompt {
             color: var(--text-glow-blue);
             font-size: 1.1rem;
@@ -159,4 +162,9 @@
         /* 頭像框 */
         .avatar-frame {
             width: 110px;
-            height: 1
+            height: 110px;
+            border-radius: 50%;
+            border: 3px solid var(--gem-purple);
+            background-color: rgba(30, 10, 50, 0.5);
+            margin: 0 auto 15px;
+            background-size: cover;
