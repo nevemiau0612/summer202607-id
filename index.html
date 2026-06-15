@@ -1,170 +1,330 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 警員寶石報到終端機</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        :root {
-            --term-bg: #0d0d1a;
-            --term-metal: #22223b;
-            --gem-purple: #9d4edd;
-            --gem-glow: rgba(157, 78, 221, 0.6);
-            --text-glow-blue: #a0d8f1;
-            --text-gold: #f7e6c4;
-            --text-gold-light: #fff8eb;
+<title>🚨 AI警員報到終端機</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+
+body{
+    margin:0;
+    background:linear-gradient(135deg,#07111f,#141b2f);
+    color:white;
+    font-family:"Noto Sans TC",sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+#terminal{
+    width:95%;
+    max-width:700px;
+    text-align:center;
+}
+
+h1{
+    color:#00e5ff;
+    text-shadow:0 0 15px #00e5ff;
+}
+
+#scanner-frame{
+    margin:auto;
+    width:350px;
+    height:350px;
+    border-radius:50%;
+    overflow:hidden;
+    border:6px solid #00e5ff;
+    box-shadow:
+        0 0 30px #00e5ff,
+        inset 0 0 30px rgba(0,229,255,.3);
+    background:black;
+}
+
+#reader{
+    width:100%;
+    height:100%;
+}
+
+/* 自拍鏡像效果 */
+#reader video{
+    transform:scaleX(-1);
+    -webkit-transform:scaleX(-1);
+}
+
+.tip{
+    margin-top:20px;
+    font-size:20px;
+    color:#80ffff;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.85);
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.card{
+    width:90%;
+    max-width:500px;
+    background:#1a1a2e;
+    border:3px solid #00e5ff;
+    border-radius:25px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 0 40px #00e5ff;
+}
+
+.avatar{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    margin:auto;
+    background-size:cover;
+    background-position:center;
+    border:4px solid #00e5ff;
+}
+
+.success{
+    color:#4ade80;
+    font-size:28px;
+    margin-bottom:20px;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+}
+
+td{
+    padding:10px;
+    text-align:left;
+}
+
+button{
+    margin-top:20px;
+    background:#00e5ff;
+    color:black;
+    border:none;
+    padding:12px 30px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:bold;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="terminal">
+
+    <h1>🚨 AI警員報到終端機</h1>
+
+    <div id="scanner-frame">
+        <div id="reader"></div>
+    </div>
+
+    <div class="tip">
+        請將警員 QR Code 對準掃描區域
+    </div>
+
+</div>
+
+<!-- 彈窗 -->
+
+<div id="modal" class="modal">
+
+    <div class="card">
+
+        <div class="success">
+            ✅ 報到成功
+        </div>
+
+        <div id="avatar" class="avatar"></div>
+
+        <table>
+
+            <tr>
+                <td>警員編號</td>
+                <td id="officerId"></td>
+            </tr>
+
+            <tr>
+                <td>姓名</td>
+                <td id="officerName"></td>
+            </tr>
+
+            <tr>
+                <td>單位</td>
+                <td id="officerDept"></td>
+            </tr>
+
+            <tr>
+                <td>職稱</td>
+                <td id="officerTitle"></td>
+            </tr>
+
+            <tr>
+                <td>報到時間</td>
+                <td id="checkinTime"></td>
+            </tr>
+
+        </table>
+
+        <button onclick="closeModal()">
+            確認並繼續掃描
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+/* =======================
+   警員資料庫
+======================= */
+
+const officers = {
+
+    "P10501":{
+        name:"陳正義",
+        dept:"刑事警察第一隊",
+        title:"偵查員",
+        avatar:"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300"
+    },
+
+    "P10502":{
+        name:"林志強",
+        dept:"交通警察大隊",
+        title:"警員",
+        avatar:"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300"
+    },
+
+    "P10503":{
+        name:"張明輝",
+        dept:"保安警察大隊",
+        title:"中隊長",
+        avatar:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300"
+    }
+
+};
+
+let scanner;
+let canScan = true;
+
+/* =======================
+   掃描成功
+======================= */
+
+function onScanSuccess(decodedText){
+
+    if(!canScan) return;
+
+    canScan = false;
+
+    const officer = officers[decodedText];
+
+    if(!officer){
+
+        alert("查無此警員資料");
+
+        canScan = true;
+        return;
+    }
+
+    document.getElementById("officerId").innerText = decodedText;
+    document.getElementById("officerName").innerText = officer.name;
+    document.getElementById("officerDept").innerText = officer.dept;
+    document.getElementById("officerTitle").innerText = officer.title;
+
+    document.getElementById("avatar").style.backgroundImage =
+        `url('${officer.avatar}')`;
+
+    document.getElementById("checkinTime").innerText =
+        new Date().toLocaleTimeString();
+
+    document.getElementById("modal").style.display = "flex";
+}
+
+/* =======================
+   掃描錯誤
+======================= */
+
+function onScanError(){}
+
+/* =======================
+   關閉彈窗
+======================= */
+
+function closeModal(){
+
+    document.getElementById("modal").style.display="none";
+
+    setTimeout(()=>{
+        canScan=true;
+    },1000);
+}
+
+/* =======================
+   啟動掃描器
+======================= */
+
+window.onload=()=>{
+
+    scanner = new Html5QrcodeScanner(
+        "reader",
+        {
+            fps:10,
+            qrbox:250,
+            aspectRatio:1
         }
+    );
 
-        body {
-            font-family: 'Noto Sans TC', 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, var(--term-bg) 0%, #1a1a2e 100%);
-            color: var(--text-glow-blue);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            justify-content: space-around;
+    scanner.render(
+        onScanSuccess,
+        onScanError
+    );
+
+    /* 強制鏡像 */
+
+    const observer = new MutationObserver(()=>{
+
+        const video =
+            document.querySelector("#reader video");
+
+        if(video){
+
+            video.style.transform="scaleX(-1)";
+            video.style.webkitTransform="scaleX(-1)";
+
+            observer.disconnect();
         }
+    });
 
-        /* 終端機主體框 */
-        #terminal-chassis {
-            width: 100%;
-            max-width: 700px;
-            background: var(--term-metal);
-            border: 2px solid #333;
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8), 0 0 10px rgba(100, 100, 200, 0.2) inset;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
+    observer.observe(document.body,{
+        childList:true,
+        subtree:true
+    });
 
-        #terminal-chassis::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/circuit-board.png');
-            opacity: 0.1;
-            pointer-events: none;
-        }
+};
 
-        /* 標題 */
-        .term-title {
-            color: var(--text-gold);
-            font-size: 2.2rem;
-            text-shadow: 0 0 10px var(--text-gold), 0 0 5px #000;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-        }
+</script>
 
-        /* 掃描區域容器 */
-        #scanner-core {
-            width: 90%;
-            max-width: 450px;
-            background: #000;
-            border: 3px solid #555;
-            border-radius: 50%; /* 圓形核心 */
-            box-shadow: 0 0 20px rgba(0, 0, 100, 0.5), 0 0 15px rgba(100, 255, 255, 0.2) inset;
-            padding: 10px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            
-            /* 🔥 關鍵修正：直接在容器級別進行視覺上的鏡像翻轉 */
-            transform: scaleX(-1); 
-            -webkit-transform: scaleX(-1);
-        }
-
-        #scanner-core::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 70%, #000 100%);
-            pointer-events: none;
-        }
-
-        /* 掃描區域內核 */
-        #reader {
-            width: 100%;
-            border: 2px solid rgba(100, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: scale(1.1); /* 稍微放大以融入圓形框 */
-            overflow: hidden;
-        }
-
-        /* 讓套件內部的 video 和 canvas 保持原樣，不單獨破壞它 */
-        #reader video {
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        /* 提示文字（因為外層被翻轉了，提示文字要在外面，才不會變成反字） */
-        .scan-prompt {
-            color: var(--text-glow-blue);
-            font-size: 1.1rem;
-            text-shadow: 0 0 5px var(--text-glow-blue);
-            margin-top: 15px;
-            z-index: 10;
-        }
-
-        /* 彈出視窗樣式 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-
-        /* 寶石彈窗主體 */
-        .gem-terminal {
-            background: radial-gradient(circle, #5e289c 0%, #1d1135 100%);
-            border: 3px solid silver;
-            border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%; 
-            width: 90%;
-            max-width: 440px;
-            padding: 40px;
-            position: relative;
-            box-shadow: 0 0 60px var(--gem-glow), 0 0 20px rgba(255, 255, 255, 0.2) inset;
-            text-align: center;
-            font-family: 'Noto Sans TC', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            min-height: 480px;
-            box-sizing: border-box;
-        }
-
-        .gem-terminal::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/cut-crystal.png');
-            opacity: 0.15;
-            pointer-events: none;
-            border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
-        }
-
-        /* 頭像框 */
-        .avatar-frame {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            border: 3px solid var(--gem-purple);
-            background-color: rgba(30, 10, 50, 0.5);
-            margin: 0 auto 15px;
-            background-size: cover;
+</body>
+</html>
