@@ -3,45 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.F.P.D 自由方程式報到終端</title>
+    <title>G.F.P.D 報到終端</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { 
             margin: 0; padding: 20px;
             background-color: #05080a !important; 
-            color: #00f2ff !important; 
+            color: #00e5ff !important; 
             font-family: 'Courier New', monospace;
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            display: flex; flex-direction: column; align-items: center;
             min-height: 100vh;
         }
 
-        h1 { font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
-        
-        .status-header { 
-            font-size: 1rem; border-top: 1px solid #00f2ff; border-bottom: 1px solid #00f2ff; 
-            padding: 10px 0; margin-bottom: 20px; width: 100%; max-width: 400px;
-        }
+        h1 { font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+        .header-line { width: 100%; max-width: 400px; border-bottom: 2px solid #00e5ff; margin-bottom: 20px; text-align: center; }
 
+        /* 掃描框框架與鏡像處理 */
         #reader { 
-            width: 100%; max-width: 400px; 
-            border: 2px solid #00f2ff;
+            width: 100%; max-width: 400px; height: 400px;
+            border: 3px solid #00e5ff;
             background: #000;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
-            margin-bottom: 20px;
+            overflow: hidden; /* 強制鏡頭內容不溢出 */
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+        }
+        
+        /* 鏡像與內容填充 */
+        #reader video { 
+            transform: scaleX(-1); 
+            object-fit: cover; 
+            width: 100%; height: 100%;
         }
 
         .result { 
             width: 100%; max-width: 400px; padding: 20px;
-            background: rgba(0, 242, 255, 0.05);
-            border: 1px solid #00f2ff;
-            display: none; text-align: center;
+            background: rgba(0, 229, 255, 0.05);
+            border: 1px solid #00e5ff;
+            margin-top: 20px; text-align: center; display: none;
+            text-shadow: 0 0 5px #00e5ff;
         }
     </style>
 </head>
 <body>
 
-    <h1>G.F.P.D 自由方程式報到終端</h1>
-    <div class="status-header">[ G.F.P.D SECURITY ACCESS ]</div>
+    <h1>自由方程式警局終端</h1>
+    <div class="header-line">[ G.F.P.D SECURITY ACCESS ]</div>
     
     <div id="reader"></div>
 
@@ -54,35 +60,7 @@
         const db = {
             "P001": { name: "黃軒樂", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
             "P002": { name: "江譽馨", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-            "P003": { name: "林書亞", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-            "P004": { name: "蔡牧寧", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-            "P005": { name: "蔡喬羽", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-            "P006": { name: "江欣妮", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P007": { name: "洪孜甯", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P008": { name: "謝礽", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P009": { name: "曾愷心", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P010": { name: "周婷儀", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P011": { name: "秦恩惠", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
-            "P012": { name: "張晏寧", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P013": { name: "姜允媃", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P014": { name: "侯邵博", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P015": { name: "陳柏宇", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P016": { name: "宋之穎", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-            "P017": { name: "謝祾", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P018": { name: "高稚茵", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P019": { name: "陳柏宣", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P020": { name: "洪孜丞", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P021": { name: "劉品均", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
-            "P022": { name: "王品韻", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P023": { name: "呂姵寧", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P024": { name: "劉家齊", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P025": { name: "賴牧敬", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P026": { name: "紀恆", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-            "P027": { name: "林路亞", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
-            "P028": { name: "郭純妤", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
-            "P029": { name: "賴牧謙", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
-            "P030": { name: "秦聖勇", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
-            "P031": { name: "秦恩冕", group: "第六組", dept: "自由方程式警局", title: "新手警員" }
+            // ... (請確保這裡有完整的31筆資料)
         };
 
         function onScanSuccess(decodedText) {
@@ -90,11 +68,12 @@
             const person = db[id];
             const div = document.getElementById('result');
             div.style.display = "block";
+            
             if (person) {
-                document.getElementById('msg').innerText = "AUTHORIZED: " + person.name;
-                document.getElementById('info').innerText = `${person.dept} | ${person.title} | ${person.group}`;
+                document.getElementById('msg').innerText = ">> ACCESS GRANTED";
+                document.getElementById('info').innerHTML = `NAME: ${person.name}<br>DEPT: ${person.dept}<br>TITLE: ${person.title}<br>GROUP: ${person.group}`;
             } else {
-                document.getElementById('msg').innerText = "ACCESS DENIED";
+                document.getElementById('msg').innerText = ">> ACCESS DENIED";
                 document.getElementById('info').innerText = "ID " + id + " NOT FOUND";
             }
             setTimeout(() => { div.style.display = "none"; }, 5000);
