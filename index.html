@@ -3,45 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.F.P.D 報到終端</title>
+    <title>G.F.P.D 自由方城市報到終端機</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        /* 科技感深色底 + 全域垂直置中 */
+        /* 背景網格與掃描線動畫 */
         body, html {
             margin: 0; padding: 0; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            background: #05080a !important; color: #00f2ff !important;
-            font-family: 'Courier New', monospace; overflow: hidden;
+            background: #00040a !important;
+            color: #00ffcc !important;
+            font-family: 'Courier New', monospace;
+            background-image: 
+                linear-gradient(rgba(0, 255, 204, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 204, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
 
-        .terminal { width: 90%; max-width: 450px; text-align: center; }
+        .terminal { width: 90%; max-width: 450px; text-align: center; z-index: 1; }
 
-        /* 掃描框動畫邊框 */
+        /* 掃描框：移除鏡像 (scaleX(-1) 代表鏡射，調整回 1 則不鏡射) */
         #reader { 
-            border: 2px solid #00f2ff;
-            border-radius: 10px;
+            border: 2px solid #00ffcc;
+            border-radius: 5px;
             background: #000;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            box-shadow: 0 0 15px #00ffcc, inset 0 0 10px #00ffcc;
             position: relative;
         }
+        #reader video { transform: scaleX(-1) !important; }
 
-        /* 強制鏡頭不反轉的 CSS 控制 */
-        #reader video { transform: scaleX(1) !important; }
-
-        h1 { font-size: 20px; letter-spacing: 4px; text-shadow: 0 0 10px #00f2ff; margin-bottom: 20px; }
+        h1 { 
+            font-size: 22px; text-transform: uppercase; 
+            text-shadow: 0 0 8px #00ffcc; margin-bottom: 25px;
+            border-bottom: 2px solid #00ffcc; padding-bottom: 10px;
+        }
 
         .result { 
-            margin-top: 20px; padding: 15px; border-radius: 5px;
-            background: rgba(0, 242, 255, 0.1);
-            border: 1px solid #00f2ff;
+            margin-top: 25px; padding: 20px;
+            background: rgba(0, 20, 20, 0.9);
+            border: 1px solid #00ffcc;
             display: none;
+            text-align: left;
         }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <h1>[ SYSTEM: CHECK-IN ]</h1>
+    <h1>[ G.F.P.D SECURITY ACCESS ]</h1>
     <div id="reader"></div>
     <div id="result" class="result">
         <h2 id="msg"></h2>
@@ -63,7 +71,7 @@
         "P010": { name: "周婷儀", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
         "P011": { name: "秦恩惠", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
         "P012": { name: "張晏寧", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
-        "P013": { name: "姜允媃", group: "第三組", dept: "自由方程式警局", title: "新手警局", title: "新手警員" },
+        "P013": { name: "姜允媃", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
         "P014": { name: "侯邵博", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
         "P015": { name: "陳柏宇", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
         "P016": { name: "宋之穎", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
@@ -73,4 +81,35 @@
         "P020": { name: "洪孜丞", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
         "P021": { name: "劉品均", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
         "P022": { name: "王品韻", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
-        "P023": { name: "呂姵寧", group: "第四組", dept: "自由
+        "P023": { name: "呂姵寧", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
+        "P024": { name: "劉家齊", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
+        "P025": { name: "賴牧敬", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
+        "P026": { name: "紀恆", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
+        "P027": { name: "林路亞", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
+        "P028": { name: "郭純妤", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
+        "P029": { name: "賴牧謙", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
+        "P030": { name: "秦聖勇", group: "第六組", dept: "自由方程式警局", title: "新手警員" },
+        "P031": { name: "秦恩冕", group: "第六組", dept: "自由方程式警局", title: "新手警員" }
+    };
+
+    function onScanSuccess(decodedText) {
+        const id = decodedText.trim();
+        const person = db[id];
+        const div = document.getElementById('result');
+        div.style.display = "block";
+        
+        if (person) {
+            document.getElementById('msg').innerText = "> STATUS: ACCESS GRANTED";
+            document.getElementById('info').innerHTML = `NAME: ${person.name}<br>DEPT: ${person.dept}<br>TITLE: ${person.title}<br>GROUP: ${person.group}`;
+        } else {
+            document.getElementById('msg').innerText = "> STATUS: ACCESS DENIED";
+            document.getElementById('info').innerText = "ID " + id + " NOT FOUND IN DATABASE";
+        }
+        setTimeout(() => { div.style.display = "none"; }, 5000);
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start({ facingMode: "user" }, { fps: 15, qrbox: 250 }, onScanSuccess);
+</script>
+</body>
+</html>
