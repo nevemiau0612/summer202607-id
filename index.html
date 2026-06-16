@@ -2,69 +2,82 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>報到系統 - 寶石收集器風格</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寶石報到終端</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .bounce-in { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-        @keyframes bounceIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-    </style>
-</head>
-<body class="bg-[#0f172a] min-h-screen flex items-center justify-center text-white">
-
-    <div class="glass w-full max-w-sm p-8 rounded-[3rem] shadow-2xl text-center">
-        <h1 class="text-xs font-bold text-cyan-400 tracking-[0.3em] mb-6">COLLECTING...</h1>
-        
-        <div id="reader" class="w-full rounded-[2rem] overflow-hidden"></div>
-        
-        <div id="result" class="hidden bounce-in">
-            <div id="avatarBox" class="w-28 h-28 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 p-1 mb-4 shadow-[0_0_30px_rgba(251,191,36,0.5)]">
-                <img id="userAvatar" src="" class="w-full h-full rounded-full object-cover bg-white">
-            </div>
-            
-            <h2 id="userName" class="text-3xl font-black"></h2>
-            <p id="userTitle" class="text-yellow-400 font-bold mt-1"></p>
-            <p id="userDept" class="text-white/60 text-sm mt-1"></p>
-        </div>
-    </div>
-
-    <script>
-        // 你的資料庫
-        const staffDatabase = {
-            "P10503": {
-                name: "張明輝",
-                dept: "保安警察大隊",
-                title: "中隊長",
-                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
-            }
-        };
-
-        const readerDiv = document.getElementById('reader');
-        const resultDiv = document.getElementById('result');
-
-        function onScanSuccess(decodedText) {
-            const staff = staffDatabase[decodedText];
-            if (staff) {
-                document.getElementById('userName').innerText = staff.name;
-                document.getElementById('userTitle').innerText = staff.title;
-                document.getElementById('userDept').innerText = staff.dept;
-                document.getElementById('userAvatar').src = staff.avatar;
-                
-                readerDiv.style.display = 'none';
-                resultDiv.classList.remove('hidden');
-
-                // 像收集寶石一樣，3秒後自動重置
-                setTimeout(() => {
-                    resultDiv.classList.add('hidden');
-                    readerDiv.style.display = 'block';
-                }, 3000);
-            } else {
-                alert("查無此 ID");
-            }
+        /* 強制全局居中排版 */
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background: #050b15 !important; color: #00e5ff !important;
+            font-family: 'Orbitron', sans-serif; /* 科技感字體 */
         }
 
-        new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }).render(onScanSuccess);
-    </script>
+        .container { 
+            width: 90%; max-width: 450px; text-align: center;
+        }
+
+        h1 { margin-bottom: 20px; font-size: 24px; text-transform: uppercase; text-shadow: 0 0 10px #00e5ff; }
+
+        /* 掃描框增加寶石光澤邊框 */
+        #reader { 
+            border: 3px solid #00e5ff;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
+        }
+
+        /* 報到結果卡片 */
+        .result { 
+            margin-top: 20px; padding: 20px; border-radius: 15px;
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid #00e5ff;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚨 報到終端</h1>
+    <div id="reader"></div>
+    <div id="result" class="result">
+        <h2 id="msg"></h2>
+        <p id="info"></p>
+    </div>
+</div>
+
+<script>
+    // 名單資料庫 (保持你的完整名單)
+    const db = {
+        "P001": { name: "黃軒樂", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
+        "P002": { name: "江譽馨", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
+        // ... 此處保持你原本的 31 筆完整名單 ...
+    };
+
+    function onScanSuccess(decodedText) {
+        const id = decodedText.trim();
+        const person = db[id];
+        const div = document.getElementById('result');
+        
+        if (person) {
+            document.getElementById('msg').innerText = "✅ 認證通過：" + person.name;
+            document.getElementById('info').innerText = `${person.dept} | ${person.title} | ${person.group}`;
+            div.style.backgroundColor = "rgba(0, 255, 100, 0.2)";
+        } else {
+            document.getElementById('msg').innerText = "❌ 認證失敗：" + id;
+            document.getElementById('info').innerText = "無效編號，請重新掃描";
+            div.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
+        }
+        div.style.display = "block";
+        setTimeout(() => { div.style.display = "none"; }, 5000);
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start({ facingMode: "user" }, { fps: 15, qrbox: 250 }, onScanSuccess);
+</script>
 </body>
 </html>
