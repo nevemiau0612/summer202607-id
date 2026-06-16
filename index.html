@@ -3,46 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>寶石報到終端</title>
+    <title>G.F.P.D 報到終端</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        /* 強制全局居中排版 */
+        /* 科技感深色底 + 全域垂直置中 */
         body, html {
             margin: 0; padding: 0; height: 100%;
             display: flex; justify-content: center; align-items: center;
-            background: #050b15 !important; color: #00e5ff !important;
-            font-family: 'Orbitron', sans-serif; /* 科技感字體 */
+            background: #05080a !important; color: #00f2ff !important;
+            font-family: 'Courier New', monospace; overflow: hidden;
         }
 
-        .container { 
-            width: 90%; max-width: 450px; text-align: center;
-        }
+        .terminal { width: 90%; max-width: 450px; text-align: center; }
 
-        h1 { margin-bottom: 20px; font-size: 24px; text-transform: uppercase; text-shadow: 0 0 10px #00e5ff; }
-
-        /* 掃描框增加寶石光澤邊框 */
+        /* 掃描框動畫邊框 */
         #reader { 
-            border: 3px solid #00e5ff;
-            border-radius: 20px;
-            overflow: hidden;
+            border: 2px solid #00f2ff;
+            border-radius: 10px;
             background: #000;
-            box-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            position: relative;
         }
 
-        /* 報到結果卡片 */
+        /* 強制鏡頭不反轉的 CSS 控制 */
+        #reader video { transform: scaleX(1) !important; }
+
+        h1 { font-size: 20px; letter-spacing: 4px; text-shadow: 0 0 10px #00f2ff; margin-bottom: 20px; }
+
         .result { 
-            margin-top: 20px; padding: 20px; border-radius: 15px;
-            background: rgba(0, 229, 255, 0.1);
-            border: 1px solid #00e5ff;
-            backdrop-filter: blur(10px);
+            margin-top: 20px; padding: 15px; border-radius: 5px;
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid #00f2ff;
             display: none;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🚨 報到終端</h1>
+<div class="terminal">
+    <h1>[ SYSTEM: CHECK-IN ]</h1>
     <div id="reader"></div>
     <div id="result" class="result">
         <h2 id="msg"></h2>
@@ -51,33 +50,27 @@
 </div>
 
 <script>
-    // 名單資料庫 (保持你的完整名單)
     const db = {
         "P001": { name: "黃軒樂", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
         "P002": { name: "江譽馨", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
-        // ... 此處保持你原本的 31 筆完整名單 ...
-    };
-
-    function onScanSuccess(decodedText) {
-        const id = decodedText.trim();
-        const person = db[id];
-        const div = document.getElementById('result');
-        
-        if (person) {
-            document.getElementById('msg').innerText = "✅ 認證通過：" + person.name;
-            document.getElementById('info').innerText = `${person.dept} | ${person.title} | ${person.group}`;
-            div.style.backgroundColor = "rgba(0, 255, 100, 0.2)";
-        } else {
-            document.getElementById('msg').innerText = "❌ 認證失敗：" + id;
-            document.getElementById('info').innerText = "無效編號，請重新掃描";
-            div.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-        }
-        div.style.display = "block";
-        setTimeout(() => { div.style.display = "none"; }, 5000);
-    }
-
-    const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start({ facingMode: "user" }, { fps: 15, qrbox: 250 }, onScanSuccess);
-</script>
-</body>
-</html>
+        "P003": { name: "林書亞", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
+        "P004": { name: "蔡牧寧", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
+        "P005": { name: "蔡喬羽", group: "第一組", dept: "自由方程式警局", title: "新手警員" },
+        "P006": { name: "江欣妮", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
+        "P007": { name: "洪孜甯", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
+        "P008": { name: "謝礽", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
+        "P009": { name: "曾愷心", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
+        "P010": { name: "周婷儀", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
+        "P011": { name: "秦恩惠", group: "第二組", dept: "自由方程式警局", title: "新手警員" },
+        "P012": { name: "張晏寧", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
+        "P013": { name: "姜允媃", group: "第三組", dept: "自由方程式警局", title: "新手警局", title: "新手警員" },
+        "P014": { name: "侯邵博", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
+        "P015": { name: "陳柏宇", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
+        "P016": { name: "宋之穎", group: "第三組", dept: "自由方程式警局", title: "新手警員" },
+        "P017": { name: "謝祾", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
+        "P018": { name: "高稚茵", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
+        "P019": { name: "陳柏宣", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
+        "P020": { name: "洪孜丞", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
+        "P021": { name: "劉品均", group: "第五組", dept: "自由方程式警局", title: "新手警員" },
+        "P022": { name: "王品韻", group: "第四組", dept: "自由方程式警局", title: "新手警員" },
+        "P023": { name: "呂姵寧", group: "第四組", dept: "自由
