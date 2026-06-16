@@ -1,328 +1,37 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 警員寶石報到終端機</title>
+    <title>報到系統 - 寶石收集器風格</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap');
-
-        :root {
-            --term-bg: #0d0d1a;
-            --term-metal: #22223b;
-            --gem-purple: #9d4edd;
-            --gem-glow: rgba(157, 78, 221, 0.6);
-            --text-glow-blue: #a0d8f1;
-            --text-gold: #f7e6c4;
-            --text-gold-light: #fff8eb;
-        }
-
-        body {
-            font-family: 'Noto Sans TC', 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, var(--term-bg) 0%, #1a1a2e 100%);
-            color: var(--text-glow-blue);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            justify-content: space-around;
-        }
-
-        /* 終端機主體框 */
-        #terminal-chassis {
-            width: 100%;
-            max-width: 700px;
-            background: var(--term-metal);
-            border: 2px solid #333;
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8), 0 0 10px rgba(100, 100, 200, 0.2) inset;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-
-        #terminal-chassis::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/circuit-board.png');
-            opacity: 0.1;
-            pointer-events: none;
-        }
-
-        /* 標題 */
-        .term-title {
-            color: var(--text-gold);
-            font-size: 2.2rem;
-            text-shadow: 0 0 10px var(--text-gold), 0 0 5px #000;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-        }
-
-        /* 掃描區域容器 */
-        #scanner-core {
-            width: 90%;
-            max-width: 450px;
-            background: #000;
-            border: 3px solid #555;
-            border-radius: 50%; /* 圓形核心 */
-            box-shadow: 0 0 20px rgba(0, 0, 100, 0.5), 0 0 15px rgba(100, 255, 255, 0.2) inset;
-            padding: 10px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #scanner-core::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 70%, #000 100%);
-            pointer-events: none;
-        }
-
-        /* 掃描區域內核 */
-        #reader {
-            width: 100%;
-            border: 2px solid rgba(100, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: scale(1.1); /* 稍微縮小以融入圓形框 */
-        }
-
-        /* 提示文字 */
-        .scan-prompt {
-            color: var(--text-glow-blue);
-            font-size: 1.1rem;
-            text-shadow: 0 0 5px var(--text-glow-blue);
-            margin-top: -10px;
-            z-index: 10;
-        }
-
-        /* 彈出視窗（寶石終端機）樣式 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-
-        /* 寶石彈窗主體 - 複製 image_0.png 的寶石外觀 */
-        .gem-terminal {
-            background: radial-gradient(circle, #5e289c 0%, #1a1a2e 100%);
-            border: 3px solid var(--term-metal);
-            border-radius: 50% 50% 5% 5% / 20% 20% 10% 10%; /* 精確模擬切面寶石形狀 */
-            width: 90%;
-            max-width: 480px;
-            padding: 40px;
-            position: relative;
-            box-shadow: 0 0 60px var(--gem-glow), 0 0 15px rgba(255, 255, 255, 0.1) inset;
-            text-align: center;
-            font-family: 'Noto Sans TC', sans-serif;
-            border: 4px solid var(--gem-purple);
-            box-shadow: 0 0 50px rgba(157, 78, 221, 0.8);
-            border: 2px solid silver;
-            border-radius: 100px;
-            background: url(image_0.png) no-repeat center;
-            background-size: cover;
-            width: 400px;
-            height: 500px;
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            color: #fff;
-        }
-
-        .gem-terminal::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/cut-crystal.png');
-            opacity: 0.15;
-            pointer-events: none;
-            border-radius: 50% 50% 5% 5% / 20% 20% 10% 10%;
-        }
-
-        /* 頭像框 - 融入寶石質感 */
-        .avatar-frame {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--gem-purple);
-            background-color: rgba(30, 10, 50, 0.5);
-            margin: 0 auto 15px;
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 0 15px var(--gem-glow), 0 0 5px silver;
-            position: relative;
-        }
-
-        .avatar-frame::after {
-            content: '';
-            position: absolute;
-            top: -5px; left: -5px; width: 130px; height: 130px;
-            border-radius: 50%;
-            border: 1px dashed rgba(255, 255, 255, 0.3);
-            pointer-events: none;
-        }
-
-        /* 成功狀態 */
-        .status-success-gem {
-            color: #4ade80; /* 發光綠色 */
-            font-weight: bold;
-            font-size: 24px;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px #4ade80;
-            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-        }
-
-        /* 資料表格 - 融入寶石終端機字體風格 */
-        .info-table-gem {
-            width: 100%;
-            margin-top: 15px;
-            border-collapse: collapse;
-            font-size: 1.1rem;
-        }
-
-        .info-table-gem td {
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: left;
-            color: var(--text-gold);
-            text-shadow: 0 0 5px var(--text-gold);
-        }
-
-        .info-table-gem td:first-child {
-            font-weight: bold;
-            color: #ccc;
-            width: 35%;
-            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-            letter-spacing: 1px;
-        }
-
-        /* 關鍵標識：溫柔 (GENTLENESS) */
-        .gentleness-brand {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--text-gold-light);
-            font-size: 1.3rem;
-            text-shadow: 0 0 8px var(--text-gold-light), 0 0 3px #000;
-            font-weight: bold;
-            font-family: 'Noto Sans TC', sans-serif;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .gentleness-brand-zh {
-            font-weight: 700;
-        }
-        
-        .gentleness-brand-en {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 400;
-        }
-
-        /* 確認按鈕 - 融入寶石終端機質感 */
-        .btn-confirm-gem {
-            margin-top: 20px;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, var(--gem-purple) 0%, #7b2cbf 100%);
-            color: var(--text-gold);
-            border: 2px solid silver;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            font-weight: bold;
-            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-            transition: all 0.2s;
-            text-shadow: 0 0 5px #000;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5), 0 0 10px var(--gem-glow);
-            letter-spacing: 1px;
-        }
-
-        .btn-confirm-gem:hover { 
-            background: linear-gradient(135deg, #7b2cbf 0%, var(--gem-purple) 100%);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.8), 0 0 15px rgba(157, 78, 221, 0.8);
-            transform: translateY(2px);
-        }
-
-        /* 修改原本套件的一些預設樣式 */
-        #html5-qrcode-anchor-scan-type-change { display: none !important; } /* 隱藏切換掃描類型的連結 */
-        #reader__dashboard_section_csr button {
-            background-color: #333 !important;
-            color: #ccc !important;
-            border-radius: 5px !important;
-            font-size: 0.9rem !important;
-        }
+        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .bounce-in { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        @keyframes bounceIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
     </style>
 </head>
-<body>
+<body class="bg-[#0f172a] min-h-screen flex items-center justify-center text-white">
 
-    <div id="terminal-chassis">
-        <div class="term-title">🚨 警員寶石報到終端機</div>
+    <div class="glass w-full max-w-sm p-8 rounded-[3rem] shadow-2xl text-center">
+        <h1 class="text-xs font-bold text-cyan-400 tracking-[0.3em] mb-6">COLLECTING...</h1>
         
-        <div id="scanner-core">
-            <div id="reader"></div>
-        </div>
-        <div class="scan-prompt">請將警員 QR Code 對準鏡頭</div>
-    </div>
-
-    <div id="resultModal" class="modal">
-        <div class="gem-terminal" id="gem-terminal">
-            <div>
-                <div class="status-success-gem">✅ 報到成功</div>
-                <div id="pop-avatar" class="avatar-frame"></div>
-                
-                <table class="info-table-gem">
-                    <tr><td>警員編號</td><td id="pop-id">-</td></tr>
-                    <tr><td>姓名</td><td id="pop-name">-</td></tr>
-                    <tr><td>單位</td><td id="pop-dept">-</td></tr>
-                    <tr><td>職稱</td><td id="pop-title">-</td></tr>
-                    <tr><td>報到時間</td><td id="pop-time">-</td></tr>
-                </table>
-                
-                <button class="btn-confirm-gem" onclick="closeModal()">確認並繼續掃描</button>
+        <div id="reader" class="w-full rounded-[2rem] overflow-hidden"></div>
+        
+        <div id="result" class="hidden bounce-in">
+            <div id="avatarBox" class="w-28 h-28 mx-auto rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 p-1 mb-4 shadow-[0_0_30px_rgba(251,191,36,0.5)]">
+                <img id="userAvatar" src="" class="w-full h-full rounded-full object-cover bg-white">
             </div>
             
-            <div class="gentleness-brand">
-                <span class="gentleness-brand-zh">溫柔</span>
-                <span class="gentleness-brand-en">(GENTLENESS)</span>
-            </div>
+            <h2 id="userName" class="text-3xl font-black"></h2>
+            <p id="userTitle" class="text-yellow-400 font-bold mt-1"></p>
+            <p id="userDept" class="text-white/60 text-sm mt-1"></p>
         </div>
     </div>
 
     <script>
-        // 【後台警員名單資料庫】
-        const officerDatabase = {
-            "P10501": {
-                name: "陳正義",
-                dept: "刑事警察大隊 第一隊",
-                title: "偵查員",
-                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" // 測試用相片網址
-            },
-            "P10502": {
-                name: "林志強",
-                dept: "交通警察大隊 直屬一中隊",
-                title: "警員",
-                avatar: ""
-            },
+        // 你的資料庫
+        const staffDatabase = {
             "P10503": {
                 name: "張明輝",
                 dept: "保安警察大隊",
@@ -331,61 +40,31 @@
             }
         };
 
-        let html5QrcodeScanner;
-        let isScanning = true;
+        const readerDiv = document.getElementById('reader');
+        const resultDiv = document.getElementById('result');
 
-        function initScanner() {
-            html5QrcodeScanner = new Html5QrcodeScanner(
-                "reader", { fps: 10, qrbox: 250, aspectRatio: 1.0 }
-            );
-            html5QrcodeScanner.render(onScanSuccess, onScanError);
-        }
-
-        function onScanSuccess(decodedText, decodedResult) {
-            if (!isScanning) return;
-            isScanning = false;
-            
-            const officerId = decodedText.trim();
-            const officer = officerDatabase[officerId];
-
-            if (officer) {
-                document.getElementById('pop-id').innerText = officerId;
-                document.getElementById('pop-name').innerText = officer.name;
-                document.getElementById('pop-dept').innerText = officer.dept;
-                document.getElementById('pop-title').innerText = officer.title;
+        function onScanSuccess(decodedText) {
+            const staff = staffDatabase[decodedText];
+            if (staff) {
+                document.getElementById('userName').innerText = staff.name;
+                document.getElementById('userTitle').innerText = staff.title;
+                document.getElementById('userDept').innerText = staff.dept;
+                document.getElementById('userAvatar').src = staff.avatar;
                 
-                const now = new Date();
-                document.getElementById('pop-time').innerText = now.toLocaleTimeString();
-                
-                const avatarFrame = document.getElementById('pop-avatar');
-                if(officer.avatar) {
-                    avatarFrame.style.backgroundImage = `url('${officer.avatar}')`;
-                } else {
-                    avatarFrame.style.backgroundImage = 'none';
-                }
+                readerDiv.style.display = 'none';
+                resultDiv.classList.remove('hidden');
 
-                document.getElementById('resultModal').style.display = 'flex';
-                document.getElementById('gem-terminal').style.display = 'flex'; // 顯示寶石彈窗內容
-                
-                // 播放音效 (可選)
-                // new Audio('success.mp3').play();
+                // 像收集寶石一樣，3秒後自動重置
+                setTimeout(() => {
+                    resultDiv.classList.add('hidden');
+                    readerDiv.style.display = 'block';
+                }, 3000);
             } else {
-                alert(`⚠️ 查無此警員編號: ${officerId}`);
-                isScanning = true;
+                alert("查無此 ID");
             }
         }
 
-        function onScanError(err) {}
-
-        function closeModal() {
-            document.getElementById('resultModal').style.display = 'none';
-            document.getElementById('gem-terminal').style.display = 'none'; // 隱藏寶石彈窗內容
-            setTimeout(() => {
-                isScanning = true;
-            }, 1000);
-        }
-
-        window.addEventListener('load', initScanner);
+        new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }).render(onScanSuccess);
     </script>
 </body>
 </html>
