@@ -3,26 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自由方程式警局報到終端</title>
+    <title>G.F.P.D 自由方程式報到終端</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { 
             margin: 0; padding: 20px;
-            background: #000 !important; 
-            color: #0f0 !important; 
+            background-color: #05080a !important; 
+            color: #00f2ff !important; 
             font-family: 'Courier New', monospace;
-            display: flex; flex-direction: column; align-items: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
             min-height: 100vh;
         }
-        h1 { border-bottom: 2px solid #0f0; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.5rem; text-align: center; }
-        #reader { width: 100%; max-width: 350px; height: 350px; border: 2px solid #0f0; background: #000; }
-        .result { margin-top: 20px; padding: 15px; border: 1px solid #0f0; text-align: center; display: none; width: 100%; max-width: 350px; }
+
+        h1 { font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+        
+        .status-header { 
+            font-size: 1rem; border-top: 1px solid #00f2ff; border-bottom: 1px solid #00f2ff; 
+            padding: 10px 0; margin-bottom: 20px; width: 100%; max-width: 400px;
+        }
+
+        #reader { 
+            width: 100%; max-width: 400px; 
+            border: 2px solid #00f2ff;
+            background: #000;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .result { 
+            width: 100%; max-width: 400px; padding: 20px;
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid #00f2ff;
+            display: none; text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <h1>自由方程式警局報到終端</h1>
+    <h1>G.F.P.D 自由方程式報到終端</h1>
+    <div class="status-header">[ G.F.P.D SECURITY ACCESS ]</div>
+    
     <div id="reader"></div>
+
     <div id="result" class="result">
         <h2 id="msg"></h2>
         <p id="info"></p>
@@ -69,17 +91,17 @@
             const div = document.getElementById('result');
             div.style.display = "block";
             if (person) {
-                document.getElementById('msg').innerText = "報到成功: " + person.name;
+                document.getElementById('msg').innerText = "AUTHORIZED: " + person.name;
                 document.getElementById('info').innerText = `${person.dept} | ${person.title} | ${person.group}`;
             } else {
-                document.getElementById('msg').innerText = "系統錯誤";
-                document.getElementById('info').innerText = "查無此編號: " + id;
+                document.getElementById('msg').innerText = "ACCESS DENIED";
+                document.getElementById('info').innerText = "ID " + id + " NOT FOUND";
             }
             setTimeout(() => { div.style.display = "none"; }, 5000);
         }
 
         const html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "user" }, { fps: 10, qrbox: 250 }, onScanSuccess);
+        html5QrCode.start({ facingMode: "user" }, { fps: 15, qrbox: 250 }, onScanSuccess);
     </script>
 </body>
 </html>
